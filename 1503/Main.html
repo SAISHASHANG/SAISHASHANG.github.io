@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2D Web Configurator POC</title>
+<style>
+  body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+  }
+
+  .LeftTab {
+    width: 360px;
+    height: 98vh;
+    background-color: #e6e6e6;
+    padding: 10px;
+    position: relative;
+    float: left; 
+    display: none; /* Initially hidden */
+  }
+
+  .CategoryTabContainer {
+    width: 350px; /* Set a fixed width */
+  }
+
+  .CategoryTab {
+    background-color: white;
+    height: 56px;
+    width: 350px;
+    border-radius: 20px;
+    margin: 0 auto; /* Center the contents horizontally */
+    display: flex; /* Align buttons in center */
+    justify-content: center; /* Align buttons in center */
+  }
+
+  .CategoryTab button {
+    margin: 0px;
+    background-color: #ffffff;
+    border: 1px solid #ffffff;
+    border-radius: 5px;
+    padding:0px;
+    cursor: pointer;
+  }
+
+  .CategoryTab button img {
+    width: 35px;
+    height: 35px;
+    margin-right: 5px;
+  }
+
+  .CategoryTypeBtn button {
+    display: flex;
+    outline: none; 
+    border: none; 
+    background-color: #e6e6e6;
+    color: white; 
+    padding: 10px 20px;
+    cursor: pointer; 
+    border-radius: 0px; 
+  }
+
+  .CategoryTypeBtn img {
+    width: 28px; 
+    height: 20px; 
+  }
+
+  .CategoryTypeContainer {
+    padding: 60px 0; /* Adjust padding */
+    float: top;
+    justify-content: center;
+  }
+
+  .categoryTypeTextContainer {
+    float: top;
+    padding-top: 0px;
+  }
+
+
+  .AssetPanel{
+    background-color: white;
+    height: 600px;
+    width: 340px;
+    border-radius: 20px;
+    padding-top: 20px; 
+    margin-top: 60px;
+    margin-left: 10px;
+    overflow-y: auto;
+ 
+    
+   
+  }
+
+
+  .AssetPanel button{
+    background-color: rgb(214, 214, 214);
+    height: 200px;
+    width: 300px;
+    border-radius: 20px;
+    padding-top: 20px; 
+    margin-left: 15px;
+    margin-bottom: 20px;
+    border-style: hidden;
+
+    
+  }
+  .CloseBtn {
+    display: flex;
+    outline: none; 
+    border: none; 
+    background-color: #e6e6e6;
+    color: white; 
+    cursor: pointer; 
+    border-radius: 0px; 
+    margin-right: 10px; /* Add margin between close button and text */
+  }
+</style>
+</head>
+<body>
+
+<div class="LeftTab" id="leftTab">
+
+  <div class="categoryTypeTextContainer">
+    <div style=" float: left;">
+      <button onclick="toggleLeftTab()" class="CloseBtn">
+        <img src="Resources/Images/Back.png" alt="Close"> 
+      </button>
+    </div>
+
+    <div class="categoryTypeText" id="categoryTypeText">
+      <h4> Category Type Text </h4>
+    </div>
+  </div>
+
+  <div class="CategoryTabContainer" id="categoryTabContainer">
+    <div class="CategoryTab" id="categoryTab">
+      <!-- Category buttons will be populated here -->
+    </div>
+  </div>
+
+   <div class="AssetPanel">
+
+
+   </div>
+</div>
+
+<div class="CategoryTypeContainer">
+  <div class="CategoryTypeBtn">
+    <button onclick="populateCategory('shells')" style="border-top-right-radius: 10px;">
+      <img src="Resources/Images/Shell.png" alt="Shells"> 
+    </button>
+  </div>
+
+  <div class="CategoryTypeBtn">
+    <button onclick="populateCategory('products')" style="border-bottom-right-radius: 10px;"> 
+      <img src="Resources/Images/Products.png" alt="Products"> 
+    </button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+
+<script>
+
+
+
+// Function to populate the asset tab based on the selected category's options
+// Function to populate the asset tab based on the selected category's options
+function populateAssetTab(options) {
+  var assetPanel = document.querySelector(".AssetPanel");
+  assetPanel.innerHTML = ""; // Clear previous buttons
+  
+  // Create buttons for each ID in the options array
+  options.forEach(function(option) {
+    var assetCard = document.createElement("button");
+    assetCard.style.position = "relative"; // Set position to relative
+    assetCard.style.backgroundImage = `url(Resources/Images/${option.id}.png)`; // Set background image
+    assetCard.style.backgroundPosition = "center"; // Center the background image
+    assetCard.style.backgroundRepeat = "no-repeat"; // Prevent background image from repeating
+
+    // Create a container for the ID text
+    var idContainer = document.createElement("div");
+    idContainer.textContent = option.id; // Set button text to ID
+    idContainer.style.position = "absolute"; // Set position to absolute
+    idContainer.style.bottom = "5px"; // Adjust bottom spacing
+    idContainer.style.left = "0"; // Align text to the left
+    idContainer.style.right = "0"; // Align text to the right
+    idContainer.style.textAlign = "center"; // Center text horizontally
+    idContainer.style.fontSize = "12px"; // Adjust font size
+    assetCard.appendChild(idContainer); // Append the ID container to the button
+
+    assetPanel.appendChild(assetCard); // Append the button to the asset panel
+  });
+}
+
+
+
+// Function to populate the category tab based on the selected category
+function populateCategory(categoryType) {
+  var categoryTab = document.getElementById("categoryTab");
+  categoryTab.innerHTML = ""; // Clear previous buttons
+
+  var categories = Object.keys(categoryData[categoryType]);
+  categories.forEach(function(item) {
+    var button = document.createElement("button");
+    var icon = document.createElement("img");
+    icon.src = categoryData[categoryType][item].icon; // Get the icon path for the current category
+    icon.alt = item; // Set alt text for accessibility
+    button.appendChild(icon); // Append the icon to the button
+    var description = categoryData[categoryType][item].description; // Get the description for the current category
+    button.title = description; // Set the description as the title attribute for tooltip
+
+    // Add event listener to log the category name when button is clicked
+    button.addEventListener('click', function() {
+      console.log(item); // Print category name to console
+      if (categoryType === 'shells') {
+        populateAssetTab(AssetData.configurator[0].shell.find(e => e.name === item).options);
+      } else if (categoryType === 'products') {
+        populateAssetTab(AssetData.configurator[1].product.find(e => e.name === item).options);
+      }
+    });
+
+    categoryTab.appendChild(button); // Append the button to the category tab
+  });
+
+  // Update category type text
+  document.getElementById("categoryTypeText").innerHTML = "<h4>" + categoryType.charAt(0).toUpperCase() + categoryType.slice(1) + "</h4>";
+  document.getElementById("leftTab").style.display = "block"; // Ensure left tab is visible
+}
+
+
+function toggleLeftTab() {
+  var leftTab = document.getElementById("leftTab");
+  if (leftTab.style.display === "block") {
+    leftTab.style.display = "none";
+  } else {
+    leftTab.style.display = "block";
+  }
+}
+
+</script>
+
+</body>
+</html>

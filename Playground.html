@@ -156,7 +156,15 @@
             </button>
         </div>
     </div>
-    <script src="data.js"></script>
+
+
+    <!-- HTML for the static right panel -->
+<div id="right-panel" style="position: absolute; right: 0; top: 0; width: 200px; height: 100%; background-color: #f0f0f0; padding: 10px;">
+    <div id="slot-categories" class="SlotCategories"></div>
+    <div id="slot-container"></div>
+</div>
+
+    <script src="Data.js"></script>
 
     <!-- Cables.gl canvas -->
     <canvas id="glcanvas" width="100vw" height="100vh" tabindex="1"></canvas>
@@ -176,39 +184,41 @@
             }
         }
 
-        // Function to populate the asset tab based on the selected category's options
         function populateAssetTab(options) {
-            var assetPanel = document.querySelector(".AssetPanel");
-            assetPanel.innerHTML = ""; // Clear previous buttons
-            
-            // Create buttons for each ID in the options array
-            options.forEach(function(option) {
-                var assetCard = document.createElement("button");
-                assetCard.style.position = "relative"; // Set position to relative
-                assetCard.style.backgroundImage = `url(Resources/Images/${option.id}.png)`; // Set background image
-                assetCard.style.backgroundPosition = "center"; // Center the background image
-                assetCard.style.backgroundRepeat = "no-repeat"; // Prevent background image from repeating
-            
-                // Create a container for the ID text
-                var idContainer = document.createElement("div");
-                idContainer.textContent = option.id; // Set button text to ID
-                idContainer.style.position = "absolute"; // Set position to absolute
-                idContainer.style.bottom = "5px"; // Adjust
-                // bottom spacing
-                idContainer.style.left = "0"; // Align text to the left
-                idContainer.style.right = "0"; // Align text to the right
-                idContainer.style.textAlign = "center"; // Center text horizontally
-                idContainer.style.fontSize = "12px"; // Adjust font size
-                assetCard.appendChild(idContainer); // Append the ID container to the button
-            
-                assetPanel.appendChild(assetCard); // Append the button to the asset panel
-                
-            assetCard.addEventListener('click', function() {
-    // Print asset details to console
-    printAssetDetails(option.id);
-});
+    var assetPanel = document.querySelector(".AssetPanel");
+    assetPanel.innerHTML = ""; // Clear previous buttons
+    
+    // Create buttons for each ID in the options array
+    options.forEach(function(option) {
+        var assetCard = document.createElement("button");
+        assetCard.style.position = "relative"; // Set position to relative
+        assetCard.style.backgroundImage = `url(Resources/Images/${option.id}.png)`; // Set background image
+        assetCard.style.backgroundPosition = "center"; // Center the background image
+        assetCard.style.backgroundRepeat = "no-repeat"; // Prevent background image from repeating
 
-            });
+        // Create a container for the ID text
+        var idContainer = document.createElement("div");
+        idContainer.textContent = option.id; // Set button text to ID
+        idContainer.style.position = "absolute"; // Set position to absolute
+        idContainer.style.bottom = "5px"; // Adjust bottom spacing
+        idContainer.style.left = "0"; // Align text to the left
+        idContainer.style.right = "0"; // Align text to the right
+        idContainer.style.textAlign = "center"; // Center text horizontally
+        idContainer.style.fontSize = "12px"; // Adjust font size
+        assetCard.appendChild(idContainer); // Append the ID container to the button
+
+        assetPanel.appendChild(assetCard); // Append the button to the asset panel
+        
+        // Add event listener to asset card button
+        assetCard.addEventListener('click', function() {
+            // Print asset details to console
+            printAssetDetails(option.id);
+            
+            // Populate slot categories in the right panel
+            populateSlotCategories(option.id);
+        });
+    });
+
 
 
         }
@@ -295,6 +305,63 @@ function printAssetDetails(assetId) {
         console.log("Asset not found with ID:", assetId);
     }
 }
+
+
+
+
+// JavaScript to populate the static right panel
+// Function to populate slot categories
+// Function to populate slot categories based on the selected asset ID
+function populateSlotCategories(assetId) {
+    var slotCategories = document.querySelector(".SlotCategories");
+    slotCategories.innerHTML = ""; // Clear previous slot categories
+    
+    // Find the slot data for the specified asset ID
+    var assetSlotData = PimID_32941.result.shell.find(function(asset) {
+        return asset.id === assetId;
+    });
+
+    // Check if the slot data is found
+    if (assetSlotData && assetSlotData.slotData) {
+        // Iterate over the slot data and populate slot categories
+        assetSlotData.slotData.forEach(function(slotType) {
+            // Create button for slot category
+            var slotCategoryButton = document.createElement("button");
+            slotCategoryButton.textContent = slotType.slotType.name;
+            slotCategoryButton.classList.add("SlotCategoryButton");
+            slotCategoryButton.addEventListener("click", function() {
+                // Populate slots for the selected slot category
+                populateSlots(slotType.slots);
+            });
+            slotCategories.appendChild(slotCategoryButton);
+        });
+    } else {
+        console.log("Slot data not found for the specified asset ID.");
+    }
+}
+
+
+// Function to populate slots
+function populateSlots(slots) {
+    // Clear previous slots
+    var slotContainer = document.getElementById('slot-container');
+    slotContainer.innerHTML = '';
+
+    // Create slots
+    slots.forEach(function(slot) {
+        var slotButton = document.createElement('button');
+        slotButton.textContent = slot.name;
+        slotButton.classList.add('slot-button');
+
+        // Set background image from hero image URL
+        slotButton.style.backgroundImage = 'url(' + slot.media.heroImage + ')';
+
+        slotContainer.appendChild(slotButton);
+    });
+}
+
+// Call populateSlotCategories function with the selected asset ID when an asset is clicked in the left panel
+
 
     </script>
 
