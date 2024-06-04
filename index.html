@@ -1,339 +1,127 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2D Web Configurator with Cables.gl</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            overflow: hidden; /* Disable scrolling / rubberband effect on mobile */
-            height: 100vh;
-        }
-
-        .LeftTab {
-            position: absolute;
-            top: 0;
-            left: 0;
-            z-index: 999; /* Ensure it's above the canvas */
-            width: 360px;
-            height: 100%;
-            background-color: #e6e6e6;  
-            padding: 10px;
-            display: none; /* Initially hidden */
-        }
-
-        .CategoryTabContainer {
-            width: 350px; /* Set a fixed width */
-        }
-
-        .CategoryTab {
-            background-color: white;
-            height: 56px;
-            width: 350px;
-            border-radius: 20px;
-            margin: 0 auto; /* Center the contents horizontally */
-            display: flex; /* Align buttons in center */
-            justify-content: center; /* Align buttons in center */
-        }
-
-        .CategoryTab button {
-            margin: 0px;
-            background-color: #ffffff;
-            border: 1px solid #ffffff;
-            border-radius: 5px;
-            padding: 0px;
-            cursor: pointer;
-        }
-
-        .CategoryTab button img {
-            width: 35px;
-            height: 35px;
-            margin-right: 5px;
-        }
-
-        .CategoryTypeBtn button {
-            display: flex;
-            outline: none;
-            border: none;
-            background-color: #e6e6e6;
-            color: white;
-            padding: 10px 20px;
-            cursor: pointer;
-            border-radius: 0px;
-        }
-
-        .CategoryTypeBtn img {
-            width: 28px;
-            height: 20px;
-        }
-
-        .CategoryTypeContainer {
-    position: fixed; /* Adjust positioning as needed */
-    top: 0; /* Adjust positioning as needed */
-    left: 0; /* Adjust positioning as needed */
-    z-index: 998; /* Ensure it's below the canvas */
-    width: 100px; /* Adjust width as needed */
-    height: 100px; /* Adjust height as needed */
-    background-color: transparent; /* Set background to transparent */
-    padding-top: 20px; /* Adjust padding as needed */
-}
-
-        .categoryTypeTextContainer {
-            float: top;
-            padding-top: 0px;
-        }
-
-        .AssetPanel {
-            background-color: white;
-            height: 75vh;
-            width: 340px;
-            border-radius: 20px;
-            padding-top: 20px;
-            margin-top: 60px;
-            margin-left: 10px;
-            overflow-y: auto;
-        }
-
-        .AssetPanel button {
-            background-color: rgb(214, 214, 214);
-            height: 200px;
-            width: 300px;
-            border-radius: 20px;
-            padding-top: 20px;
-            margin-left: 15px;
-            margin-bottom: 20px;
-            border-style: hidden;
-        }
-
-        .CloseBtn {
-            display: flex;
-            outline: none;
-            border: none;
-            background-color: #e6e6e6;
-            color: white;
-            cursor: pointer;
-            border-radius: 0px;
-            margin-right: 10px; /* Add margin between close button and text */
-        }
-    </style>
+<title>Project Title</title>
+<meta charset="utf-8">
+<meta name="viewport" content="target-densitydpi=device-dpi, width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=no, minimal-ui" />
+<style> @-ms-viewport { width: device-width; } </style>
+<link rel="stylesheet" href="vendor/reset.min.css">
+<link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- Left panel -->
-    <div class="LeftTab" id="leftTab">
-        <div class="categoryTypeTextContainer">
-            <div style=" float: left;">
-                <button onclick="toggleLeftTab()" class="CloseBtn">
-                    <img src="Resources/Images/Back.png" alt="Close"> 
-                </button>
-            </div>
-        
-            <div class="categoryTypeText" id="categoryTypeText">
-                <h4> Category Type Text </h4>
-            </div>
-        </div>
-        
-        <div class="CategoryTabContainer" id="categoryTabContainer">
-            <div class="CategoryTab" id="categoryTab">
-                <!-- Category buttons will be populated here -->
-            </div>
-        </div>
-        
-        <div class="AssetPanel"></div>
-    </div>
+<body class="multiple-scenes ">
+
+<div id="pano"></div>
+
+<div id="sceneList">
+  <ul class="scenes">
     
-    <div class="CategoryTypeContainer">
-        <div class="CategoryTypeBtn">
-            <button onclick="populateCategory('shells')" style="border-top-right-radius: 10px;">
-                <img src="Resources/Images/Shell.png" alt="Shells"> 
-            </button>
-        </div>
-        
-        <div class="CategoryTypeBtn">
-            <button onclick="populateCategory('products')" style="border-bottom-right-radius: 10px;"> 
-                <img src="Resources/Images/Products.png" alt="Products"> 
-            </button>
-        </div>
-    </div>
-    <script src="data.js"></script>
-
-    <!-- Cables.gl canvas -->
-    <canvas id="glcanvas" width="100vw" height="100vh" tabindex="1"></canvas>
-
-    <!-- Include Cables.gl script -->
-    <script type="text/javascript" src="js/patch.js" async></script>
-
-    <!-- Include your JavaScript code -->
-    <script>
-        // Function to toggle the visibility of the left panel
-        function toggleLeftTab() {
-            var leftTab = document.getElementById("leftTab");
-            if (leftTab.style.display === "block") {
-                leftTab.style.display = "none";
-            } else {
-                leftTab.style.display = "block";
-            }
-        }
-
-        // Function to populate the asset tab based on the selected category's options
-        function populateAssetTab(options) {
-            var assetPanel = document.querySelector(".AssetPanel");
-            assetPanel.innerHTML = ""; // Clear previous buttons
-            
-            // Create buttons for each ID in the options array
-            options.forEach(function(option) {
-                var assetCard = document.createElement("button");
-                assetCard.style.position = "relative"; // Set position to relative
-                assetCard.style.backgroundImage = `url(Resources/Images/${option.id}.png)`; // Set background image
-                assetCard.style.backgroundPosition = "center"; // Center the background image
-                assetCard.style.backgroundRepeat = "no-repeat"; // Prevent background image from repeating
-            
-                // Create a container for the ID text
-                var idContainer = document.createElement("div");
-                idContainer.textContent = option.id; // Set button text to ID
-                idContainer.style.position = "absolute"; // Set position to absolute
-                idContainer.style.bottom = "5px"; // Adjust
-                // bottom spacing
-                idContainer.style.left = "0"; // Align text to the left
-                idContainer.style.right = "0"; // Align text to the right
-                idContainer.style.textAlign = "center"; // Center text horizontally
-                idContainer.style.fontSize = "12px"; // Adjust font size
-                assetCard.appendChild(idContainer); // Append the ID container to the button
-            
-                assetPanel.appendChild(assetCard); // Append the button to the asset panel
-                
-            assetCard.addEventListener('click', function() {
-    // Print asset details to console
-    printAssetDetails(option.id);
-});
-
-            });
-
-
-        }
-
-        // Function to populate the category tab based on the selected category
-        function populateCategory(categoryType) {
-    console.log("Clicked on: " + categoryType); // Add this line
-    var categoryTab = document.getElementById("categoryTab");
-    categoryTab.innerHTML = "";
-                
-    var categories = Object.keys(categoryData[categoryType]);
-    categories.forEach(function(item, index) {
-        var button = document.createElement("button");
-        var icon = document.createElement("img");
-        icon.src = categoryData[categoryType][item].icon; // Get the icon path for the current category
-        icon.alt = item; // Set alt text for accessibility
-        button.appendChild(icon); // Append the icon to the button
-        var description = categoryData[categoryType][item].description; // Get the description for the current category
-        button.title = description; // Set the description as the title attribute for tooltip
-        
-        // Add event listener to log the category name when button is clicked
-        button.addEventListener('click', function() {
-            console.log(item); // Print category name to console
-            if (categoryType === 'shells') {
-                populateAssetTab(AssetData.configurator[0].shell.find(e => e.name === item).options);
-            } else if (categoryType === 'products') {
-                populateAssetTab(AssetData.configurator[1].product.find(e => e.name === item).options);
-            }
-        });
-        
-        categoryTab.appendChild(button); // Append the button to the category tab
-
-        // If it's the first category, simulate a click on it to populate the asset tab
-        if (index === 0) {
-            button.click();
-        }
-    });
+      <a href="javascript:void(0)" class="scene" data-id="0-reception01">
+        <li class="text">Reception01</li>
+      </a>
     
+      <a href="javascript:void(0)" class="scene" data-id="1-reception02">
+        <li class="text">Reception02</li>
+      </a>
     
-    // Update category type text
-    document.getElementById("categoryTypeText").innerHTML = "<h4>" + categoryType.charAt(0).toUpperCase() + categoryType.slice(1) + "</h4>";
-    document.getElementById("leftTab").style.display = "block"; // Ensure left tab is visible
-}
+      <a href="javascript:void(0)" class="scene" data-id="2-side01">
+        <li class="text">Side01</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="3-side02">
+        <li class="text">Side02</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="4-dh02">
+        <li class="text">DH02</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="5-dh03">
+        <li class="text">DH03</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="6-mf">
+        <li class="text">MF</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="7-mr01">
+        <li class="text">MR01</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="8-mr02">
+        <li class="text">MR02</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="9-mr03">
+        <li class="text">MR03</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="10-mr04">
+        <li class="text">MR04</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="11-panm40002">
+        <li class="text">pan.M4.0002</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="12-phonebooth">
+        <li class="text">Phonebooth</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="13-ca01">
+        <li class="text">CA01</li>
+      </a>
+    
+      <a href="javascript:void(0)" class="scene" data-id="14-dh01">
+        <li class="text">DH01</li>
+      </a>
+    
+  </ul>
+</div>
 
+<div id="titleBar">
+  <h1 class="sceneName"></h1>
+</div>
 
+<a href="javascript:void(0)" id="autorotateToggle">
+  <img class="icon off" src="img/play.png">
+  <img class="icon on" src="img/pause.png">
+</a>
 
-// Function to print asset details
-function printAssetDetails(assetId) {
-    // Find the asset with the given ID
-    var asset = null;
+<a href="javascript:void(0)" id="fullscreenToggle">
+  <img class="icon off" src="img/fullscreen.png">
+  <img class="icon on" src="img/windowed.png">
+</a>
 
-    // Search in shell options
-    AssetData.configurator[0].shell.forEach(function(shell) {
-        shell.options.forEach(function(option) {
-            if (option.id === assetId) {
-                asset = option;
-            }
-        });
-    });
+<a href="javascript:void(0)" id="sceneListToggle">
+  <img class="icon off" src="img/expand.png">
+  <img class="icon on" src="img/collapse.png">
+</a>
 
-    // Search in product options if not found in shells
-    if (!asset) {
-        AssetData.configurator[1].product.forEach(function(product) {
-            product.options.forEach(function(option) {
-                if (option.id === assetId) {
-                    asset = option;
-                }
-            });
-        });
-    }
+<a href="javascript:void(0)" id="viewUp" class="viewControlButton viewControlButton-1">
+  <img class="icon" src="img/up.png">
+</a>
+<a href="javascript:void(0)" id="viewDown" class="viewControlButton viewControlButton-2">
+  <img class="icon" src="img/down.png">
+</a>
+<a href="javascript:void(0)" id="viewLeft" class="viewControlButton viewControlButton-3">
+  <img class="icon" src="img/left.png">
+</a>
+<a href="javascript:void(0)" id="viewRight" class="viewControlButton viewControlButton-4">
+  <img class="icon" src="img/right.png">
+</a>
+<a href="javascript:void(0)" id="viewIn" class="viewControlButton viewControlButton-5">
+  <img class="icon" src="img/plus.png">
+</a>
+<a href="javascript:void(0)" id="viewOut" class="viewControlButton viewControlButton-6">
+  <img class="icon" src="img/minus.png">
+</a>
 
-    // If asset found
-    if (asset) {
-        console.log("Asset ID:", asset.id);
-        if (asset.slots.length > 0) {
-            console.log("Slots:");
-            asset.slots.forEach(function(slot) {
-                console.log(slot);
-            });
-        } else {
-            console.log("No slots available for this asset.");
-        }
-    } else {
-        console.log("Asset not found with ID:", assetId);
-    }
-}
+<script src="vendor/screenfull.min.js" ></script>
+<script src="vendor/bowser.min.js" ></script>
+<script src="vendor/marzipano.js" ></script>
 
-    </script>
+<script src="data.js"></script>
+<script src="index.js"></script>
 
-    <!-- Include Cables.gl specific JavaScript -->
-    <script>
-        // Function to handle critical errors
-        function showError(errId, errMsg) {
-            // handle critical errors here if needed
-        }
-
-        // Function called when patch is initialized
-        function patchInitialized(patch) {
-            // You can now access the patch object (patch), register variable watchers and so on
-        }
-
-        // Function called when patch is finished loading
-        function patchFinishedLoading(patch) {
-            // The patch is ready now, all assets have been loaded
-        }
-
-        // Event listener for Cables.jsLoaded event
-        document.addEventListener("CABLES.jsLoaded", function (event) {
-            // Initialize Cables.gl patch
-            CABLES.patch = new CABLES.Patch({
-                patch: CABLES.exportedPatch,
-                prefixAssetPath: "",
-                assetPath: "assets/",
-                jsPath: "js/",
-                glCanvasId: "glcanvas",
-                glCanvasResizeToWindow: true,
-                onError: showError,
-                onPatchLoaded: patchInitialized,
-                onFinishedLoading: patchFinishedLoading,
-                canvas: { alpha: true, premultipliedAlpha: true } // make canvas transparent
-            });
-        });
-
-        // Disable rubberband effect on mobile devices
-        document.getElementById('glcanvas').addEventListener('touchmove', (e)=>{ e.preventDefault(); }, false);
-    </script>
 </body>
 </html>
